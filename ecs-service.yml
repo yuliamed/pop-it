@@ -1,0 +1,21 @@
+Description: ECS Service
+
+  Resoures:
+    Task:
+
+  Type: AWS::ECS::Service
+  DependsOn:
+    - Listener
+  Properties:
+    Role:
+      Ref: ECSServiceRole
+    TaskDefinition:
+      Ref: ECSTaskDefinition
+    DesiredCount: 1
+    LoadBalancers:
+      - TargetGroupArn:
+          Ref: TargetGroup
+        ContainerPort: 80
+        ContainerName: pop-it-pop-it
+    Cluster:
+      Ref: ECSCluster
