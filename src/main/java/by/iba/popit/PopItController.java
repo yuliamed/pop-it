@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class PopItController {
     @GetMapping("/health")
     public ResponseEntity<String> getHealth() {
-        return new ResponseEntity<>("Healthy!", HttpStatus.OK);
+        return new ResponseEntity<>("Health is good, really good!", HttpStatus.OK);
     }
 
     @GetMapping("/test-get")

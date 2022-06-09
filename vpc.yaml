@@ -112,6 +112,14 @@ Resources:
     Properties:
       VpcId: !Ref VPC
 
+  RoutesForPublicRouteTable:
+    Type: AWS::EC2::Route
+    DependsOn: VPCGatewayAttachment
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+      RouteTableId: !Ref PublicRouteTable
+
   PublicSubnet1RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
@@ -135,6 +143,13 @@ Resources:
       RouteTableId: !Ref PrivateRouteTable1
       SubnetId: !Ref PrivateSubnet1
 
+  RoutesForPrivateRouteTable1:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      RouteTableId: !Ref PrivateRouteTable1
+      NatGatewayId: !Ref NatGateway1
+
   PrivateRouteTable2:
     Type: AWS::EC2::RouteTable
     Properties:
@@ -146,12 +161,12 @@ Resources:
       RouteTableId: !Ref PrivateRouteTable2
       SubnetId: !Ref PrivateSubnet2
 
-  NoIngressSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
+  RoutesForPrivateRouteTable2:
+    Type: AWS::EC2::Route
     Properties:
-      GroupName: "no-ingress-sg"
-      GroupDescription: "Security group with no ingress rule"
-      VpcId: !Ref VPC
+      DestinationCidrBlock: 0.0.0.0/0
+      RouteTableId: !Ref PrivateRouteTable2
+      NatGatewayId: !Ref NatGateway2
 
 Outputs:
   VPC:
@@ -181,7 +196,3 @@ Outputs:
   PrivateSubnet2:
     Description: A reference to the private subnet in the 2nd Availability Zone
     Value: !Ref PrivateSubnet2
-
-  NoIngressSecurityGroup:
-    Description: Security group with no ingress rule
-    Value: !Ref NoIngressSecurityGroup
