@@ -1,6 +1,8 @@
-Description: ECS Service
+AWSTemplateFormatVersion: '2010-09-09'
+Description: ECS cluster + LB + SG + CloudWatch def
 
-Resoures:
+Resources:
+
   ECSCluster:
     Type: AWS::ECS::Cluster
     Properties:
@@ -9,15 +11,12 @@ Resoures:
   LoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
-      IpAddressType: String
-      LoadBalancerAttributes:
-        - LoadBalancerAttribute
-      Name: String
+      Name: lb-for-ecs
       SecurityGroups:
         - !Ref LoadBalancerSecurityGroup
-      Subnets:
-        - !ImportValue 'PublicSubnet1'
-        - !ImportValue 'PublicSubnet2'
+#      Subnets:
+#        - !ImportValue 'PublicSubnet1'
+#        - !ImportValue 'PublicSubnet2'
 
   LoadBalancerListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
@@ -25,9 +24,9 @@ Resoures:
       LoadBalancerArn: !Ref LoadBalancer
       Protocol: HTTP
       Port: 80
-        DefaultActions:
-            - Type: forward
-              TargetGroupArn: !Ref DefaultTargetGroup
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref DefaultTargetGroup
 
   LoadBalancerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -46,6 +45,12 @@ Resoures:
       Protocol: 'HTTP'
       Port: '80'
 
+  CloudWatchLogsGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: 'apis'
+      RetentionInDays: 1
+
   ContainerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -56,6 +61,7 @@ Resoures:
           IpProtocol: -1
 
 Outputs:
+
   Cluster:
     Value: !Ref ECSCluster
     Export:
