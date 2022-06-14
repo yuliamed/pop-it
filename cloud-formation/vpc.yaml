@@ -178,12 +178,6 @@ Outputs:
     Export:
       Name: 'VPC'
 
-#  VpcCIDRBlock:
-#    Description: CIDR block of VPC
-#      Value: !Ref VpcCIDR
-#      Export:
-#        Name: 'VpcCIDRBlock'
-
   PublicSubnet1:
     Description: A reference to the public subnet in the 1st Availability Zone
     Value: !Ref PublicSubnet1
