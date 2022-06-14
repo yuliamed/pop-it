@@ -1,3 +1,4 @@
+AWSTemplateFormatVersion: 2010-09-09
 Description: This template deploys a VPC, with a pair of public and private subnets spread
   across two Availability Zones. It deploys an internet gateway, with a default
   route on the public subnets. It deploys a pair of NAT gateways (one in each AZ),
@@ -34,6 +35,7 @@ Parameters:
     Default: 10.0.21.0/24
 
 Resources:
+
   VPC:
     Type: AWS::EC2::VPC
     Properties:
@@ -169,17 +171,18 @@ Resources:
       NatGatewayId: !Ref NatGateway2
 
 Outputs:
+
   VPC:
     Description: A reference to the created VPC
     Value: !Ref VPC
     Export:
       Name: 'VPC'
 
-  VpcCIDR:
-    Description: CIDR block of VPC
-      Value: !Ref VpcCIDR
-      Export:
-        Name: 'VpcCIDR'
+#  VpcCIDRBlock:
+#    Description: CIDR block of VPC
+#      Value: !Ref VpcCIDR
+#      Export:
+#        Name: 'VpcCIDRBlock'
 
   PublicSubnet1:
     Description: A reference to the public subnet in the 1st Availability Zone

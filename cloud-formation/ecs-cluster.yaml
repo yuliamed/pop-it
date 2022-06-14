@@ -14,9 +14,9 @@ Resources:
       Name: lb-for-ecs
       SecurityGroups:
         - !Ref LoadBalancerSecurityGroup
-#      Subnets:
-#        - !ImportValue 'PublicSubnet1'
-#        - !ImportValue 'PublicSubnet2'
+      Subnets:
+        - !ImportValue 'PublicSubnet1'
+        - !ImportValue 'PublicSubnet2'
 
   LoadBalancerListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
