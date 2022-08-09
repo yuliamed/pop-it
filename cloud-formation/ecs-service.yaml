@@ -8,19 +8,32 @@ Resources:
 
     Properties:
       Family: apis
-      Cpu: 256
-      Memory: 512
+      Cpu: 512
+      Memory: 1024
       NetworkMode: awsvpc
       RequiresCompatibilities:
         - FARGATE
       ExecutionRoleArn: !ImportValue ECSTaskExecutionRole
       ContainerDefinitions:
-        - Name: pop-it-pop-it
-          Image: 932279645368.dkr.ecr.eu-west-2.amazonaws.com/pop-it-pop-it
+        - Name: back-end
+          Image: 932279645368.dkr.ecr.eu-west-2.amazonaws.com/back-end
           Cpu: 256
           Memory: 512
           PortMappings:
             - ContainerPort: 8080
+              Protocol: tcp
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: 'apis'
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: 'cloudformation-app-api'
+        - Name: front-end
+          Image: 932279645368.dkr.ecr.eu-west-2.amazonaws.com/front-end
+          Cpu: 256
+          Memory: 512
+          PortMappings:
+            - ContainerPort: 80
               Protocol: tcp
           LogConfiguration:
             LogDriver: awslogs
@@ -50,9 +63,12 @@ Resources:
           SecurityGroups:
             - !ImportValue ContainerSecurityGroup
       LoadBalancers:
-        - ContainerName: pop-it-pop-it
-          ContainerPort: 8080
+        - ContainerName: front-end
+          ContainerPort: 80
           TargetGroupArn: !Ref TargetGroup
+#        - ContainerName: back-end
+#          ContainerPort: 8080
+#          TargetGroupArn: !Ref TargetGroup
 
   TargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
@@ -64,7 +80,7 @@ Resources:
       Matcher:
         HttpCode: 200-299
       HealthCheckIntervalSeconds: 10
-      HealthCheckPath: /api/v1/service/health
+      HealthCheckPath: /api/v1/auth
       HealthCheckProtocol: HTTP
       HealthCheckTimeoutSeconds: 5
       HealthyThresholdCount: 10
@@ -78,8 +94,7 @@ Resources:
       Conditions:
         - Field: path-pattern
           Values:
-            - /api/v1/service/test-get
-            - /api/v1/service/health
+            - /api/v1/auth
       Actions:
         - TargetGroupArn: !Ref TargetGroup
           Type: forward
@@ -88,12 +103,12 @@ Resources:
 Outputs:
   ApiEndpoint1:
     Description: Welcome API Endpoint
-    Value: !Join [ '', [ 'http://', !ImportValue DomainName, '/api/v1/service/test-get' ] ]
+    Value: !Join [ '', [ 'http://', !ImportValue DomainName, '/api/v1/auth' ] ]
     Export:
       Name: 'ApiEndpoint1'
 
   ApiEndpoint2:
     Description: Health API Endpoint
-    Value: !Join [ '', [ 'http://', !ImportValue DomainName, '/api/v1/service/health' ] ]
+    Value: !Join [ '', [ 'http://', !ImportValue DomainName, '/api/v1/auth' ] ]
     Export:
       Name: 'ApiEndpoint2'
