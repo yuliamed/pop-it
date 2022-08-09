@@ -1,0 +1,86 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: LB + SG
+
+Parameters:
+  LoadBalancerName:
+    Description: Name for alb
+    Type: String
+    Default: alb-for-ecs
+  LoadBalancerListeningPort:
+    Description: Port for listening
+    Type: Number
+    Default: 80
+  LoadBalancerListeningProtocol:
+    Description: Protocol for listening
+    Type: String
+    Default: HTTP
+  TargetGroupName:
+    Description: Name for target group
+    Type: String
+    Default: default
+
+Resources:
+  LoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: !Ref LoadBalancerName
+      SecurityGroups:
+        - !Ref LoadBalancerSecurityGroup
+      Subnets:
+        - !ImportValue 'PublicSubnet1'
+        - !ImportValue 'PublicSubnet2'
+
+  LoadBalancerListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref LoadBalancer
+      Protocol: !Ref LoadBalancerListeningProtocol
+      Port: !Ref LoadBalancerListeningPort
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref DefaultTargetGroup
+
+  LoadBalancerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for loadbalancer to services on ECS
+      VpcId: !ImportValue 'VPC'
+      SecurityGroupIngress:
+        - CidrIp: 0.0.0.0/0
+          IpProtocol: -1
+
+  DefaultTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: !Ref TargetGroupName
+      VpcId: !ImportValue 'VPC'
+      Protocol: !Ref LoadBalancerListeningProtocol
+      Port: !Ref LoadBalancerListeningPort
+
+  ContainerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId: !ImportValue 'VPC'
+      GroupDescription: Security Group for ecs containers
+      SecurityGroupIngress:
+        - SourceSecurityGroupId: !Ref 'LoadBalancerSecurityGroup'
+          IpProtocol: -1
+
+Outputs:
+  Listener:
+    Description: listener port 80
+    Value: !Ref LoadBalancerListener
+    Export:
+      Name: 'Listener'
+
+    ContainerSecurityGroup:
+      Description: container security group
+      Value: !Ref ContainerSecurityGroup
+      Export:
+        Name: 'ContainerSecurityGroup'
+
+    LoadBalancerDNS:
+      Description: Domain name for the loadbalancer
+      Value: !GetAtt LoadBalancer.DNSName
+      Export:
+        Name: 'DomainName'

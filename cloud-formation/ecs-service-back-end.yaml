@@ -15,12 +15,12 @@ Resources:
         - FARGATE
       ExecutionRoleArn: !ImportValue ECSTaskExecutionRole
       ContainerDefinitions:
-        - Name: front-end
-          Image: 932279645368.dkr.ecr.eu-west-2.amazonaws.com/front-end
+        - Name: back-end
+          Image: 932279645368.dkr.ecr.eu-west-2.amazonaws.com/back-end
           Cpu: 256
           Memory: 512
           PortMappings:
-            - ContainerPort: 80
+            - ContainerPort: 8080
               Protocol: tcp
           LogConfiguration:
             LogDriver: awslogs
@@ -33,7 +33,7 @@ Resources:
     Type: AWS::ECS::Service
     DependsOn: ListenerRule
     Properties:
-      ServiceName: cloudformation-service
+      ServiceName: cloudformation-service-back-end
       TaskDefinition: !Ref TaskDefenition
       Cluster: !ImportValue 'ECSCluster'
       LaunchType: FARGATE
@@ -81,7 +81,7 @@ Resources:
       Conditions:
         - Field: path-pattern
           Values:
-            - /
+            - /api/v1/auth
       Actions:
         - TargetGroupArn: !Ref TargetGroup
           Type: forward
@@ -90,6 +90,12 @@ Resources:
 Outputs:
   ApiEndpoint1:
     Description: Welcome API Endpoint
-    Value: !Join [ '', [ 'http://', !ImportValue DomainName, '/' ] ]
+    Value: !Join [ '', [ 'http://', !ImportValue DomainName, '/api/v1/auth' ] ]
     Export:
       Name: 'ApiEndpoint1'
+
+  ApiEndpoint2:
+    Description: Health API Endpoint
+    Value: !Join [ '', [ 'http://', !ImportValue DomainName, '/api/v1/auth' ] ]
+    Export:
+      Name: 'ApiEndpoint2'
